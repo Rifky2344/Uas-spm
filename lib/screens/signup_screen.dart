@@ -5,8 +5,7 @@ import '../services/firestore_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   final VoidCallback showLoginScreen;
-  const SignUpScreen({Key? key, required this.showLoginScreen})
-    : super(key: key);
+  const SignUpScreen({super.key, required this.showLoginScreen});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -112,10 +111,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     validator: (v) {
-                      if (v == null || v.isEmpty)
+                      if (v == null || v.isEmpty) {
                         return 'Username tidak boleh kosong';
-                      if (v.contains(' '))
+                      }
+                      if (v.contains(' ')) {
                         return 'Username tidak boleh mengandung spasi';
+                      }
                       if (v.length < 4) return 'Username minimal 4 karakter';
                       return null;
                     },

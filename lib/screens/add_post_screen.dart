@@ -57,7 +57,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         _titleController.text.trim(),
         _contentController.text.trim(),
         _authorUsername!,
-        currentUser!.uid, // <-- Mengirim UID pengguna
+        currentUser!.uid,
       );
       if (mounted) Navigator.pop(context);
     }
@@ -76,7 +76,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       appBar: AppBar(title: const Text('Tambah Postingan Baru')),
       body: _isLoadingUsername
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
+          : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [

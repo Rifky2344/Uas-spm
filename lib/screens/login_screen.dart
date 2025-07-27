@@ -4,8 +4,7 @@ import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback showSignUpScreen;
-  const LoginScreen({Key? key, required this.showSignUpScreen})
-    : super(key: key);
+  const LoginScreen({super.key, required this.showSignUpScreen});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();

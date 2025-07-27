@@ -37,6 +37,17 @@ class _AccountScreenState extends State<AccountScreen> {
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    // ListTile untuk Foto Profil
+                    ListTile(
+                      leading: const Icon(Icons.image),
+                      title: const Text("Foto Profil"),
+                      trailing: CircleAvatar(
+                        backgroundImage: AssetImage(
+                          userData['profilePicture'] ?? 'assets/pp/avatar1.jpg',
+                        ),
+                      ),
+                      onTap: () => _showProfilePictureDialog(context),
+                    ),
                     // ListTile untuk Username (tanpa tombol edit)
                     ListTile(
                       leading: const Icon(Icons.person),
@@ -105,12 +116,46 @@ class _AccountScreenState extends State<AccountScreen> {
                   Navigator.pop(context);
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Gagal: Coba logout dan login kembali terlebih dahulu."), backgroundColor: Colors.red));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Gagal: Coba logout dan login kembali terlebih dahulu."), backgroundColor: Colors.red));
               }
             },
             child: const Text("Simpan"),
           ),
         ],
+      ),
+    );
+  }
+
+  // Tambahkan metode ini
+  void _showProfilePictureDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Pilih Foto Profil"),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.count(
+            shrinkWrap: true,
+            crossAxisCount: 3,
+            children: [
+              for (int i = 1; i <= 10; i++)
+                GestureDetector(
+                  onTap: () async {
+                    String picturePath = 'assets/pp/avatar$i.jpg';
+                    await _firestoreService.updateProfilePicture(
+                      currentUser!.uid,
+                      picturePath,
+                    );
+                    if (mounted) Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset('assets/pp/avatar$i.jpg'),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

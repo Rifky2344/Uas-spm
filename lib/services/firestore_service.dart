@@ -12,30 +12,35 @@ class FirestoreService {
         .snapshots();
   }
 
-  Future<void> addPost(
+  Future<DocumentReference<Map<String, dynamic>>> addPost(
     String title,
     String content,
     String authorUsername,
     String authorUid,
-  ) {
+  ) async {
+    // Get user profile to get profile picture
+    DocumentSnapshot userProfile = await getUserProfile(authorUid);
+    String profilePicture = (userProfile.data() as Map<String, dynamic>)['profilePicture'] ?? 'assets/profile_pictures/avatar1.jpg';
+    
     return _db.collection('posts').add({
       'title': title,
       'content': content,
       'authorUsername': authorUsername,
       'authorUid': authorUid,
+      'authorProfilePicture': profilePicture,
       'timestamp': FieldValue.serverTimestamp(),
     });
   }
 
-  Future<void> updatePost(String docId, String title, String content) {
-    return _db.collection('posts').doc(docId).update({
+  Future<void> updatePost(String docId, String title, String content) async {
+    await _db.collection('posts').doc(docId).update({
       'title': title,
       'content': content,
     });
   }
 
-  Future<void> deletePost(String docId) {
-    return _db.collection('posts').doc(docId).delete();
+  Future<void> deletePost(String docId) async {
+    await _db.collection('posts').doc(docId).delete();
   }
 
   Future<void> addComment(
@@ -43,8 +48,8 @@ class FirestoreService {
     String commentText,
     String authorUsername,
     String authorUid,
-  ) {
-    return _db.collection('posts').doc(postId).collection('comments').add({
+  ) async {
+    await _db.collection('posts').doc(postId).collection('comments').add({
       'text': commentText,
       'authorUsername': authorUsername,
       'authorUid': authorUid,
@@ -76,5 +81,22 @@ class FirestoreService {
     return result.docs.isNotEmpty;
   }
 
-  // Fungsi updateUsername dan updateAuthorUsernameInPostsAndComments sudah dihapus.
+  Future<void> updateProfilePicture(String uid, String picturePath) async {
+    // Update user profile
+    await _db.collection('users').doc(uid).update({
+      'profilePicture': picturePath,
+    });
+
+    // Update all existing posts by this user
+    final posts = await _db
+        .collection('posts')
+        .where('authorUid', isEqualTo: uid)
+        .get();
+        
+    final batch = _db.batch();
+    for (var doc in posts.docs) {
+      batch.update(doc.reference, {'authorProfilePicture': picturePath});
+    }
+    await batch.commit();
+  }
 }
