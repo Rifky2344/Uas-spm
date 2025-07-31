@@ -29,6 +29,7 @@ class FirestoreService {
       'authorUid': authorUid,
       'authorProfilePicture': profilePicture,
       'timestamp': FieldValue.serverTimestamp(),
+      'likeCount': 0, // Add this line
     });
   }
 
@@ -98,5 +99,33 @@ class FirestoreService {
       batch.update(doc.reference, {'authorProfilePicture': picturePath});
     }
     await batch.commit();
+  }
+
+  // --- FUNGSI LIKE ---
+
+  Future<void> toggleLike(String postId, String userId) async {
+    final postRef = _db.collection('posts').doc(postId);
+    final likeRef = postRef.collection('likes').doc(userId);
+
+    final likeDoc = await likeRef.get();
+    if (likeDoc.exists) {
+      // Unlike: Remove like document and decrement count
+      await likeRef.delete();
+      await postRef.update({'likeCount': FieldValue.increment(-1)});
+    } else {
+      // Like: Add like document and increment count
+      await likeRef.set({'timestamp': FieldValue.serverTimestamp()});
+      await postRef.update({'likeCount': FieldValue.increment(1)});
+    }
+  }
+
+  Stream<bool> getLikeStatus(String postId, String userId) {
+    return _db
+        .collection('posts')
+        .doc(postId)
+        .collection('likes')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.exists);
   }
 }

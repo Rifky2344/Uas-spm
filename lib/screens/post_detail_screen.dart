@@ -142,6 +142,53 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 ),
               ),
             ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  StreamBuilder<bool>(
+                    stream: _firestoreService.getLikeStatus(widget.docId, currentUser?.uid ?? ''),
+                    builder: (context, snapshot) {
+                      final bool isLiked = snapshot.data ?? false;
+                      return Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              isLiked ? Icons.favorite : Icons.favorite_border,
+                              color: isLiked ? Colors.red : Colors.grey,
+                              size: 28,
+                            ),
+                            onPressed: currentUser == null
+                                ? null
+                                : () => _firestoreService.toggleLike(
+                                      widget.docId,
+                                      currentUser!.uid,
+                                    ),
+                          ),
+                          Text(
+                            '${widget.post['likeCount'] ?? 0} Suka',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
             _buildCommentInputField(),
           ],
         ),
@@ -204,7 +251,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             IconButton(
               icon: const Icon(Icons.send),
               onPressed: (_authorUsername == null) ? null : _postComment,
-              color: Theme.of(context).primaryColor,
             ),
           ],
         ),

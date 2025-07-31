@@ -127,38 +127,65 @@ class _HomeScreenState extends State<HomeScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    trailing: isAuthor
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blueGrey,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isAuthor) ...[
+                          IconButton(
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.blueGrey,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPostScreen(
+                                    post: post,
+                                    docId: docId,
+                                  ),
                                 ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EditPostScreen(
-                                        post: post,
-                                        docId: docId,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.redAccent,
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () => _firestoreService.deletePost(docId),
+                          ),
+                        ],
+                        StreamBuilder<bool>(
+                          stream: _firestoreService.getLikeStatus(
+                              docId, currentUser?.uid ?? ''),
+                          builder: (context, snapshot) {
+                            final bool isLiked = snapshot.data ?? false;
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    isLiked ? Icons.favorite : Icons.favorite_border,
+                                    color: isLiked ? Colors.red : Colors.grey,
+                                  ),
+                                  onPressed: currentUser == null
+                                      ? null
+                                      : () => _firestoreService.toggleLike(
+                                          docId, currentUser!.uid),
                                 ),
-                                onPressed: () =>
-                                    _firestoreService.deletePost(docId),
-                              ),
-                            ],
-                          )
-                        : null,
+                                Text(
+                                  '${post['likeCount'] ?? 0}',
+                                  style: TextStyle(
+                                    color: isDarkMode ? Colors.white70 : Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
